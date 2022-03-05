@@ -24,6 +24,7 @@ export const Fill = ({ selected, ...rest }) => {
     const { x, y } = getRelativeMousePosition(e);
     floodFill.fill('#000000', x, y);
     ctx.putImageData(floodFill.imageData, 0, 0);
+    // outline(canvas, ctx, floodFill.imageData);
   }, [ctx, canvas]);
 
   const enable = () => {
@@ -32,6 +33,27 @@ export const Fill = ({ selected, ...rest }) => {
 
   const disable = () => {
     canvas.removeEventListener('click', fill);
+  }
+
+  const outline = (canvas, ctx, img) => {
+    var dArr = [-1,-1, 0,-1, 1,-1, -1,0, 1,0, -1,1, 0,1, 1,1], // offset array
+      s = 2,  // thickness scale
+      i = 0,  // iterator
+      x = 5,  // final position
+      y = 5;
+
+    // draw images at offsets from the array scaled by s
+    for(; i < dArr.length; i += 2)
+      ctx.putImageData(img, x + dArr[i]*s, y + dArr[i+1]*s);
+
+    // fill with color
+    ctx.globalCompositeOperation = "source-in";
+    ctx.fillStyle = "blue";
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+
+    // draw original image in normal mode
+    ctx.globalCompositeOperation = "source-over";
+    ctx.putImageData(img, x, y);
   }
 
   return (

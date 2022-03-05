@@ -4,6 +4,7 @@ import { Fill } from './Fill';
 import { Eraser } from './Eraser';
 import { List, ListItem } from '@mui/material';
 import { atom, useRecoilState } from 'recoil';
+import { ColorPicker } from './ColorPicker';
 
 const colorState = atom({
   key: 'colors',
@@ -22,6 +23,10 @@ const tools = [
   {
     name: 'Fill',
     Component: Fill,
+  },
+  {
+    name: 'Color Picker',
+    Component: ColorPicker,
   }
 ];
 

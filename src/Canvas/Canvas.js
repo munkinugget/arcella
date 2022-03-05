@@ -41,7 +41,8 @@ export const Canvas = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        flexGrow: 1
+        flexGrow: 1,
+        cursor: 'crosshair'
       }}>
         <canvas
           ref={enableCanvas}
