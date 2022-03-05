@@ -1,10 +1,13 @@
-import { Layer, Test } from "./Canvas/Layer/Layer";
+import { RecoilRoot } from "recoil";
+import { Canvas } from "./Canvas/Canvas";
+import { CssBaseline } from "@mui/material";
 
 function App() {
   return (
-    <div>
-      <Layer active zIndex={0} />
-    </div>
+    <RecoilRoot>
+      <CssBaseline/>
+      <Canvas/>
+    </RecoilRoot>
   );
 }
 

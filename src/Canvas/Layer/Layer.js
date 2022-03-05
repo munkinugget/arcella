@@ -20,6 +20,7 @@ export class Layer extends Component {
   componentDidMount() {
     const canvas = this.canvasRef.current;
     const context = canvas.getContext('2d');
+    // context.imageSmoothingQuality = 'high';
     UndoCanvas.enableUndo(context);
     this.ctx = context;
     this.ctx.putTag(); // Initial history state
@@ -42,8 +43,11 @@ export class Layer extends Component {
     this.ctx.strokeStyle = '#000000';
     this.ctx.lineWidth = 3 * 2;
     this.ctx.moveTo(this.x, this.y);
+    // const x1 = (this.x + point.x) / 2;
+    // const y1 = (this.y + point.y) / 2;
     // const mid = midPoint(position, currentPosition);
-    // ctx.quadraticCurveTo(position.x, position.y, mid.x, mid.y);
+    // this.ctx.quadraticCurveTo(this.x, this.y, x1, y1);
+    // this.ctx.quadraticCurveTo(x1, y1, point.x, point.y);
     this.ctx.lineTo(point.x, point.y);
     this.ctx.stroke();
     

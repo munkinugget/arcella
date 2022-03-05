@@ -1,25 +1,48 @@
+import { useEffect, useCallback } from 'react';
 import FloodFill from 'q-floodfill';
+import { getRelativeMousePosition } from './utils';
+import { useRecoilState } from 'recoil';
+import { canvasState, contextState } from '../Canvas';
+import { List, ListItem, ListItemIcon } from '@mui/material';
+import { FormatColorFill } from '@mui/icons-material';
 
-export class Fill {
-  constructor() {
-    this.canvas = null;
-    this.ctx = null;
-  }
+export const Fill = ({ selected, ...rest }) => {
+  const [canvas] = useRecoilState(canvasState);
+  const [ctx] = useRecoilState(contextState);
 
-  fill(e) {
-    const img = this.ctx.getImageData(0,0, this.canvas.width, this.canvas.height);
+  useEffect(() => {
+    if(selected) {
+      enable();
+    } else {
+      disable();
+    }
+  }, [selected]);
+
+  const fill = useCallback((e) => {
+    const img = ctx.getImageData(0,0, canvas.width, canvas.height);
     const floodFill = new FloodFill(img);
-    floodFill.fill('#000000', e.clientX, e.clientY);
-    this.ctx.putImageData(floodFill.imageData, 0, 0);
-  }
+    const { x, y } = getRelativeMousePosition(e);
+    floodFill.fill('#000000', x, y);
+    ctx.putImageData(floodFill.imageData, 0, 0);
+  }, [ctx, canvas]);
 
-  enable(canvas, ctx) {
-    this.canvas = canvas;
-    this.ctx = ctx;
+  const enable = () => {
     canvas.addEventListener('click', fill);
   }
 
-  disable() {
-    this.canvas.removeEventListener('click');
+  const disable = () => {
+    canvas.removeEventListener('click', fill);
   }
+
+  return (
+    <ListItem
+      button
+      selected={selected}
+      { ...rest }
+    >
+      <ListItemIcon sx={{ minWidth: 0 }}>
+        <FormatColorFill/>
+      </ListItemIcon>
+    </ListItem>
+  );
 }
