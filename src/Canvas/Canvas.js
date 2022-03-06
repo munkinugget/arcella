@@ -7,6 +7,13 @@ import { atom, useRecoilState } from 'recoil';
 
 export const canvasState = atom({ key: 'canvas', default: null, dangerouslyAllowMutability: true });
 export const contextState = atom({ key: 'context', default: null, dangerouslyAllowMutability: true });
+export const colorState = atom({
+  key: 'colors',
+  default: {
+    foreground: 'rgba(0,0,0,1)',
+    background: 'rgba(255,255,255,1)'
+  }
+});
 
 export const Canvas = () => {
   // Cant use recoil here, it sets the object to immutable, and values change on render, need to prop drill

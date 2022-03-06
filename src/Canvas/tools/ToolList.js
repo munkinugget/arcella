@@ -5,6 +5,7 @@ import { Eraser } from './Eraser';
 import { List, ListItem } from '@mui/material';
 import { atom, useRecoilState } from 'recoil';
 import { ColorPicker } from './ColorPicker';
+import { Palette } from './Palette';
 
 const colorState = atom({
   key: 'colors',
@@ -45,8 +46,7 @@ export const ToolList = () => {
           />
         ))
       }
-      <ListItem>
-      </ListItem>
+      <Palette />
     </List>
   );
 }
