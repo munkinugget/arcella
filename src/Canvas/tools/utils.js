@@ -3,13 +3,28 @@ export const midPoint = (p1, p2) => ({
   y: p1.y + (p2.y - p1.y) / 2,
 });
 
+export const angle = (cx, cy, ex, ey) => {
+  const dy = ey - cy;
+  const dx = ex - cx;
+  let theta = Math.atan2(dy, dx); // range (-PI, PI]
+  theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
+  return theta;
+}
+
 export const getRelativeMousePosition = (e) => {
-  const rect = e.target.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const x = e.offsetX;
+  const y = e.offsetY;
 
   return { x, y };
 }
+
+export const getAbsoluteMousePosition = (e) => (
+  { x: e.screenX, y: e.screenY }
+);
+
+export const getRelativeMouseMovement = (e) => (
+  { x: e.movementX, y: e.movementY }
+);
 
 export const colorToRgbaString = (color) => {
   const { r,g,b,a } = color.rgb;

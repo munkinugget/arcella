@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Box, Drawer } from '@mui/material';
-import UndoCanvas from 'undo-canvas';
-import keyboardJS from 'keyboardjs';
-import { ToolList } from './tools/ToolList';
+import { Box, Drawer, List, ListItem, ListItemIcon } from '@mui/material';
+import { Brush, Clear, Colorize, FormatColorFill } from '@mui/icons-material';
 import { atom, useRecoilState } from 'recoil';
+import CompleteCanvas from './CompleteCanvas';
+import { Palette } from './tools/Palette';
 
 export const canvasState = atom({ key: 'canvas', default: null, dangerouslyAllowMutability: true });
 export const contextState = atom({ key: 'context', default: null, dangerouslyAllowMutability: true });
@@ -14,35 +13,53 @@ export const colorState = atom({
     background: 'rgba(255,255,255,1)'
   }
 });
+export const brushState = atom({
+  key: 'brush',
+  default: {
+    style: 'round',
+    size: 6,
+  },
+});
+export const eraserState = atom({
+  key: 'eraser',
+  default: {
+    style: 'round',
+    size: 6,
+  },
+});
+
+export const toolState = atom({ key: 'tool', default: 'Brush' });
 
 export const Canvas = () => {
-  // Cant use recoil here, it sets the object to immutable, and values change on render, need to prop drill
-  const [canvas, setCanvas] = useRecoilState(canvasState);
-  const [, setContext] = useRecoilState(contextState);
-
-  const enableCanvas = (canvas) => {
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    
-    UndoCanvas.enableUndo(ctx);
-    ctx.putTag(); // Initial history state
-
-    keyboardJS.bind('ctrl + z', () => {
-      ctx.undoTag();
-    });
-    keyboardJS.bind('ctrl + y', () => {
-      ctx.redoTag();
-    });
-
-    setCanvas(canvas);
-    setContext(ctx);
-  };
+  const [tool, setTool] = useRecoilState(toolState);
+  const [colors, setColors] = useRecoilState(colorState);
 
   return (
     <Box sx={{ display: 'flex' }}>
       <Drawer variant="permanent" open>
-        { canvas ? <ToolList /> : null }
+        <List>
+          <ListItem button onClick={() => setTool('Brush')}>
+            <ListItemIcon sx={{ minWidth: 0 }}>
+              <Brush/>
+            </ListItemIcon>
+          </ListItem>
+          <ListItem button onClick={() => setTool('Eraser')}>
+            <ListItemIcon sx={{ minWidth: 0 }}>
+              <Clear/>
+            </ListItemIcon>
+          </ListItem>
+          <ListItem button onClick={() => setTool('ColorPicker')}>
+            <ListItemIcon sx={{ minWidth: 0 }}>
+              <Colorize/>
+            </ListItemIcon>
+          </ListItem>
+          <ListItem button onClick={() => setTool('Fill')}>
+            <ListItemIcon sx={{ minWidth: 0 }}>
+              <FormatColorFill/>
+            </ListItemIcon>
+          </ListItem>
+          <Palette />
+        </List>
       </Drawer>
       <Box component="main" sx={{
         display: 'flex',
@@ -51,12 +68,7 @@ export const Canvas = () => {
         flexGrow: 1,
         cursor: 'crosshair'
       }}>
-        <canvas
-          ref={enableCanvas}
-          width={800}
-          height={600}
-          style={{ border: '1px solid #000000' }}
-        />
+        <CompleteCanvas tool={tool} colors={colors}/>
       </Box>
     </Box>
   );

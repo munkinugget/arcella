@@ -4,6 +4,7 @@ import { ListItem, ListItemIcon } from '@mui/material';
 import { getRelativeMousePosition } from './utils';
 import { useRecoilValue } from 'recoil';
 import { canvasState, colorState, contextState } from '../Canvas';
+import keyboardJS from 'keyboardjs';
 
 export const Pen = ({ selected, ...rest }) => {
   const canvas = useRecoilValue(canvasState);
