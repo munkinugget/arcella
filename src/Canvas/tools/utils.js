@@ -11,6 +11,16 @@ export const angle = (cx, cy, ex, ey) => {
   return theta;
 }
 
+export const getCanvasMouseAngle = (canvas, mx, my) => {
+  const { x: cx, y: cy } = getCanvasCenterPoint(canvas);
+  return angle(cx, cy, mx, my);
+}
+
+export const getCanvasCenterPoint = (canvas) => {
+  const { x, y, width, height } = canvas.getBoundingClientRect();
+  return { x: x + width / 2, y: y + height / 2 };
+}
+
 export const getRelativeMousePosition = (e) => {
   const x = e.offsetX;
   const y = e.offsetY;

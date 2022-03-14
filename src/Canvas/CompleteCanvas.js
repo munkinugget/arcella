@@ -1,10 +1,11 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
-import { getRelativeMousePosition, getAbsoluteMousePosition, getRelativeMouseMovement } from './tools/utils';
+import { getRelativeMousePosition, getAbsoluteMousePosition, getRelativeMouseMovement, getCanvasMouseAngle } from './tools/utils';
 import keyboardJS from 'keyboardjs';
 import UndoCanvas from 'undo-canvas';
 import FloodFill from 'q-floodfill';
 import { Box } from '@mui/material';
+import { keyboard } from '@testing-library/user-event/dist/keyboard';
 
 export default class CompleteCanvas extends Component {
   constructor(props) {
@@ -30,6 +31,7 @@ export default class CompleteCanvas extends Component {
     this.pickColor = this.pickColor.bind(this);
 
     this.handleCanvasDrag = this.handleCanvasDrag.bind(this);
+    this.handleCanvasRotation = this.handleCanvasRotation.bind(this);
   }
 
   /*
@@ -95,6 +97,16 @@ export default class CompleteCanvas extends Component {
     });
   }
 
+  handleCanvasRotation(e) {
+    const { x, y } = getAbsoluteMousePosition(e);
+    const canvasRotation = getCanvasMouseAngle(this.canvas, x, y);
+
+    this.setState({
+      ...this.state,
+      canvasRotation
+    });
+  }
+
   enableCanvas(canvas) {
     if (this.canvas !== null && this.ctx !== null) return;
 
@@ -148,6 +160,31 @@ export default class CompleteCanvas extends Component {
         console.log('SPACE UP');
       }
     );
+
+    keyboardJS.bind(
+      'r', 
+      (e) => {
+        this[`setup${this.props.tool}`](false);
+        window.addEventListener('mousemove', this.handleCanvasRotation);
+        e.preventRepeat();
+      },
+      (e) => {
+        window.removeEventListener('mousemove', this.handleCanvasRotation);
+        this[`setup${this.props.tool}`](true);
+
+        console.log('SPACE UP');
+      }
+    );
+
+    keyboardJS.bind('esc', () => {
+      this.setState({
+        ...this.state,
+        canvasZoom: 1,
+        canvasTranslateX: 0,
+        canvasTranslateY: 0,
+        canvasRotation: 0,
+      });
+    });
 
     this[`setup${this.props.tool}`](true);
   }
@@ -215,8 +252,6 @@ export default class CompleteCanvas extends Component {
       border: '1px solid #000000',
       transform: `translateX(${canvasTranslateX}px) translateY(${canvasTranslateY}px) rotate(${canvasRotation}deg) scale(${canvasZoom})`
     };
-
-    console.log(canvasStyle)
 
     return (
       <Box component="main" sx={{

@@ -15,6 +15,7 @@ export const BrushSize = () => {
         defaultValue={brush.size}
         aria-label="Brush Size"
         valueLabelDisplay="auto"
+        value={brush.size}
         onChange={(event, size) => setBrush({ ...brush, size })}
       />
     </div>
