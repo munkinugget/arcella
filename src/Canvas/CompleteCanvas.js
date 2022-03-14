@@ -82,7 +82,7 @@ export default class CompleteCanvas extends Component {
   pickColor(e) {
     const { x, y } = getRelativeMousePosition(e);
     const [r, g, b, a] = this.ctx.getImageData(x,y, 1, 1).data;
-    console.log(`rgba(${r},${g},${b},${a})`);
+    this.props.updateColor(`rgba(${r},${g},${b},${a})`);
   }
 
   handleCanvasDrag(e) {
@@ -254,4 +254,5 @@ CompleteCanvas.propTypes = {
     background: PropTypes.string,
   }),
   brushSize: PropTypes.number,
+  updateColor: PropTypes.func,
 }

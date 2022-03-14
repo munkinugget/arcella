@@ -33,7 +33,7 @@ export const toolState = atom({ key: 'tool', default: 'Brush' });
 
 export const Canvas = () => {
   const [tool, setTool] = useRecoilState(toolState);
-  const colors = useRecoilValue(colorState);
+  const [colors, setColors] = useRecoilState(colorState);
   const brush = useRecoilValue(brushState);
 
   return (
@@ -73,9 +73,10 @@ export const Canvas = () => {
           tool={tool}
           colors={colors}
           brush={brush}
+          updateColor={(foreground) => setColors({...colors, foreground})}
         />
       </Box>
-      <Box sx={{ borderLeft: '1px solid rgba(0, 0, 0, 0.12)' }}>
+      <Box sx={{ borderLeft: '1px solid rgba(0, 0, 0, 0.12)', zIndex: 1000, background: 'white' }}>
         <BrushSize />
         <Palette />
       </Box>
