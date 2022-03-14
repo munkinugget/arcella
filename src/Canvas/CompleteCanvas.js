@@ -44,7 +44,7 @@ export default class CompleteCanvas extends Component {
     this.lastPosition = getRelativeMousePosition(e);
     this.ctx.lineCap = 'round';
     this.ctx.strokeStyle = this.props.colors.foreground;
-    this.ctx.lineWidth = this.props.brushSize;
+    this.ctx.lineWidth = this.props.brush.size;
     this.canvas.addEventListener('mousemove', this.draw);
   }
 
