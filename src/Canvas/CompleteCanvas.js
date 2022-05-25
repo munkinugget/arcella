@@ -12,7 +12,18 @@ export default class CompleteCanvas extends Component {
     super(props);
     this.canvas = null;
     this.ctx = null;
+    this.memCanvas = null;
+    this.memCtx = null;
     this.lastPosition = { x: 0, y: 0 };
+    this.points = [];
+    this.lastImageData = undefined;
+
+    this.action = null;
+    this.target = null;
+    this.canvasX = 0;
+    this.canvasY = 0;
+    this.appX = 0;
+    this.appY = 0;
 
     this.state = {
       canvasRotation: 0,
@@ -32,35 +43,45 @@ export default class CompleteCanvas extends Component {
 
     this.handleCanvasDrag = this.handleCanvasDrag.bind(this);
     this.handleCanvasRotation = this.handleCanvasRotation.bind(this);
+    this.animationStep = this.animationStep.bind(this);
   }
 
   /*
   TODO
   
-  Pan - hold space + click and drag to pan the canvas
+  Pan - hold space + click and drag to pan the canvas   
   Zoom - ctrl + + / ctrl + - to zoom in and out
   Rotate - ?
   */
 
   startDraw(e) {
-    this.lastPosition = getRelativeMousePosition(e);
+    this.points = [];
+    this.lastPosition = { x: this.canvasX, y: this.canvasY };
+    // snapshot of the canvas before the stroke
+    this.lastImageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);   
+                                                                                                                                                                                                                                                                                                                                       
+    this.memCtx.lineCap = 'round';
+    this.memCtx.strokeStyle = this.props.colors.foreground;
+    this.memCtx.lineWidth = this.props.brush.size;
+
     this.ctx.lineCap = 'round';
-    this.ctx.strokeStyle = this.props.colors.foreground;
+    this.ctx.strokeStyle = this.props.colors.foreground;                                                                                                                                                                                
     this.ctx.lineWidth = this.props.brush.size;
-    this.canvas.addEventListener('mousemove', this.draw);
+
+    this.action = 'Brush';
+    window.requestAnimationFrame(this.animationStep);
   }
 
   endDraw(e) {
-    this.canvas.removeEventListener('mousemove', this.draw);
+    this.action = null;
     this.ctx.putTag();
   }
 
-  draw(e) {
-    const position = getRelativeMousePosition(e);
+  draw() {
     const x1 = this.lastPosition.x;
-    const x2 = position.x;
+    const x2 = this.canvasX;
     const y1 = this.lastPosition.y;
-    const y2 = position.y;
+    const y2 = this.canvasY;
     
     if (Math.hypot(x2-x1, y2-y1) < 3) return; 
     
@@ -71,6 +92,44 @@ export default class CompleteCanvas extends Component {
     this.ctx.closePath();
     
     this.lastPosition = { x: x2, y: y2 };
+  }
+
+  drawPoints() {
+    this.points.push({
+      x: this.canvasX,
+      y: this.canvasY
+    });
+  
+    if (this.points.length < 3) return;
+
+    // clear memCtx
+    this.memCtx.clearRect(0, 0, this.memCanvas.width, this.memCanvas.height);
+    // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // this.ctx.putImageData(this.lastImageData, 0, 0);
+
+    this.memCtx.beginPath();
+    this.memCtx.moveTo(this.points[0].x, this.points[0].y);
+
+    let i = 1;
+    // draw a bunch of quadratics, using the average of two this.points as the control point
+    for (; i < this.points.length - 2; i++) {
+      const c = (this.points[i].x + this.points[i + 1].x) / 2;
+      const d = (this.points[i].y + this.points[i + 1].y) / 2;
+      this.memCtx.quadraticCurveTo(this.points[i].x, this.points[i].y, c, d);
+    }
+  
+    this.memCtx.quadraticCurveTo(
+      this.points[i].x,
+      this.points[i].y,
+      this.points[i + 1].x,
+      this.points[i + 1].y
+    );
+
+    this.memCtx.stroke();
+    this.memCtx.closePath();
+
+    const img = this.memCtx.getImageData(0, 0, this.memCanvas.width, this.memCanvas.height);
+    this.ctx.putImageData(img, 0, 0);
   }
 
   fill(e) {
@@ -107,14 +166,50 @@ export default class CompleteCanvas extends Component {
     });
   }
 
+  animationStep() {
+    switch (this.action) {
+      case 'Brush':
+        this.drawPoints();
+      break;
+      case 'Erase':
+        this.drawPoints();
+      break;
+      case 'Rotate':
+        this.rotate();
+      break;
+      case 'Translate':
+        this.translate();
+      break;
+    }
+
+    if (this.action) {
+      window.requestAnimationFrame(this.animationStep);
+    }
+  }
+
   enableCanvas(canvas) {
     if (this.canvas !== null && this.ctx !== null) return;
 
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-
+    this.memCanvas = document.createElement('canvas');
+    this.memCanvas.width = this.canvas.width;
+    this.memCanvas.height = this.canvas.height;
+    this.memCtx = this.memCanvas.getContext('2d');
+    this.lastImageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).imageData;
     UndoCanvas.enableUndo(this.ctx);
     this.ctx.putTag(); // Initial history state
+
+    window.addEventListener('mousemove', (e) => {
+      // Watch mouse position
+      if (e.target?.id === 'canvas') {
+        this.canvasX = e.offsetX;
+        this.canvasY = e.offsetY;
+      }
+
+      this.screenX = e.screenX;
+      this.screenY = e.screenY;
+    });
 
     keyboardJS.bind('ctrl + z', () => {
       this.ctx.undoTag();
@@ -264,6 +359,7 @@ export default class CompleteCanvas extends Component {
         height: '100%'
       }}>
         <canvas
+          id="canvas"
           ref={this.enableCanvas}
           width={800}
           height={600}
